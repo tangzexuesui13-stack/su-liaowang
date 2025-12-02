@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能瞭望数据分析处理系统 - 报告管理</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-left">
+                <h1>智能瞭望数据分析处理系统</h1>
+            </div>
+            <div class="header-right">
+                <span class="welcome">欢迎您，{{ session['username'] }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-logout">退出登录</a>
+            </div>
+        </header>
+        
+        <nav class="sidebar">
+            <ul>
+                <li><a href="{{ url_for('dashboard') }}">首页</a></li>
+                <li><a href="{{ url_for('data_warehouse') }}">数据仓库</a></li>
+                <li class="active"><a href="{{ url_for('view_reports') }}">报告管理</a></li>
+            </ul>
+        </nav>
+        
+        <main class="main-content">
+            <div class="page-header">
+                <h2>报告管理</h2>
+            </div>
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for message in messages %}
+                            <div class="flash-message">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <div class="reports-list">
+                {% for report in reports %}
+                <div class="report-item">
+                    <div class="report-header">
+                        <h3>{{ report.title }}</h3>
+                        <span class="report-date">{{ report.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                    </div>
+                    <div class="report-actions">
+                        <a href="{{ url_for('preview_report', report_id=report.id) }}" class="btn btn-secondary">在线预览</a>
+                        <a href="{{ url_for('download_report', report_id=report.id) }}" class="btn btn-primary">下载PDF</a>
+                    </div>
+                </div>
+                {% else %}
+                <div class="no-data">
+                    <p>暂无报告，请先在数据仓库中选择数据生成报告</p>
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </div>
+</body>
+</html>

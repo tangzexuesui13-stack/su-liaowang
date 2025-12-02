@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能瞭望数据分析处理系统 - 数据仓库</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-left">
+                <h1>智能瞭望数据分析处理系统</h1>
+            </div>
+            <div class="header-right">
+                <span class="welcome">欢迎您，{{ session['username'] }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-logout">退出登录</a>
+            </div>
+        </header>
+        
+        <nav class="sidebar">
+            <ul>
+                <li><a href="{{ url_for('dashboard') }}">首页</a></li>
+                <li class="active"><a href="{{ url_for('data_warehouse') }}">数据仓库</a></li>
+                <li><a href="{{ url_for('view_reports') }}">报告管理</a></li>
+            </ul>
+        </nav>
+        
+        <main class="main-content">
+            <div class="page-header">
+                <h2>数据仓库</h2>
+            </div>
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for message in messages %}
+                            <div class="flash-message">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <div class="filter-bar">
+                <form method="GET" action="{{ url_for('data_warehouse') }}">
+                    <div class="filter-item">
+                        <label for="keyword">关键词搜索：</label>
+                        <input type="text" id="keyword" name="keyword" value="{{ keyword }}" placeholder="输入关键词">
+                    </div>
+                    <div class="filter-item">
+                        <label for="date">按日期筛选：</label>
+                        <select id="date" name="date">
+                            <option value="">全部日期</option>
+                            {% for date in dates %}
+                            <option value="{{ date }}" {% if date_filter == date %}selected{% endif %}>{{ date }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">筛选</button>
+                </form>
+            </div>
+            
+            <form id="generate-report-form" method="POST" action="{{ url_for('generate_report') }}">
+                <div class="data-list">
+                    {% for record in records %}
+                    <div class="data-item">
+                        <div class="data-header">
+                            <input type="checkbox" name="record_ids[]" value="{{ record.id }}" class="select-item">
+                            <h3>{{ record.title }}</h3>
+                        </div>
+                        <div class="data-meta">
+                            <span class="source">{{ record.source }}</span>
+                            <span class="date">保存时间：{{ record.saved_at.strftime('%Y-%m-%d %H:%M:%S') }}</span>
+                            {% if record.url %}<a href="{{ record.url }}" target="_blank" class="url">查看原文</a>{% endif %}
+                        </div>
+                        <div class="data-content">
+                            {{ record.content }}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="no-data">
+                        <p>暂无数据，请先搜索并保存数据到数据库</p>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if records %}
+                <div class="action-bar">
+                    <button type="button" id="select-all" class="btn btn-secondary">全选</button>
+                    <button type="button" id="deselect-all" class="btn btn-secondary">取消全选</button>
+                    <button type="submit" class="btn btn-primary">生成AI报告</button>
+                </div>
+                {% endif %}
+            </form>
+        </main>
+    </div>
+    
+    <script>
+        // 全选/取消全选功能
+        document.getElementById('select-all').addEventListener('click', function() {
+            document.querySelectorAll('.select-item').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        });
+        
+        document.getElementById('deselect-all').addEventListener('click', function() {
+            document.querySelectorAll('.select-item').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        });
+        
+        // 表单提交验证
+        document.getElementById('generate-report-form').addEventListener('submit', function(e) {
+            const selected = document.querySelectorAll('.select-item:checked');
+            if (selected.length === 0) {
+                alert('请至少选择一条数据');
+                e.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

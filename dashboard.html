@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能瞭望数据分析处理系统 - 后台主页</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-left">
+                <h1>智能瞭望数据分析处理系统</h1>
+            </div>
+            <div class="header-right">
+                <span class="welcome">欢迎您，{{ username }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-logout">退出登录</a>
+            </div>
+        </header>
+        
+        <nav class="sidebar">
+            <ul>
+                <li class="active"><a href="{{ url_for('dashboard') }}">首页</a></li>
+                <li><a href="{{ url_for('data_warehouse') }}">数据仓库</a></li>
+                <li><a href="{{ url_for('view_reports') }}">报告管理</a></li>
+            </ul>
+        </nav>
+        
+        <main class="main-content">
+            <div class="dashboard-card">
+                <h2>数据查询</h2>
+                <form method="POST" action="{{ url_for('search') }}">
+                    <div class="search-form">
+                        <input type="text" name="keyword" placeholder="请输入查询关键字或需求" required>
+                        <button type="submit" class="btn btn-primary">搜索</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="dashboard-info">
+                <div class="info-card">
+                    <h3>系统功能</h3>
+                    <ul>
+                        <li>在上方输入框中输入查询关键词，系统将自动对接百度爬虫获取相关数据</li>
+                        <li>搜索结果可预览并批量保存到数据库</li>
+                        <li>在数据仓库中可按日期或关键词检索已保存的数据</li>
+                        <li>可选择数据生成AI分析报告并导出为PDF</li>
+                    </ul>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能瞭望数据分析处理系统 - 搜索结果</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-left">
+                <h1>智能瞭望数据分析处理系统</h1>
+            </div>
+            <div class="header-right">
+                <span class="welcome">欢迎您，{{ session['username'] }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-logout">退出登录</a>
+            </div>
+        </header>
+        
+        <nav class="sidebar">
+            <ul>
+                <li><a href="{{ url_for('dashboard') }}">首页</a></li>
+                <li><a href="{{ url_for('data_warehouse') }}">数据仓库</a></li>
+                <li><a href="{{ url_for('view_reports') }}">报告管理</a></li>
+            </ul>
+        </nav>
+        
+        <main class="main-content">
+            <div class="page-header">
+                <h2>搜索结果：{{ keyword }}</h2>
+                <p>共找到 {{ results|length }} 条相关数据</p>
+            </div>
+            
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for message in messages %}
+                            <div class="flash-message">{{ message }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+            
+            <form id="save-form" method="POST" action="{{ url_for('save_data') }}">
+                <input type="hidden" id="results-data" name="results_data">
+                <div class="data-list">
+                    {% for result in results %}
+                    <div class="data-item">
+                        <div class="data-header">
+                            <input type="checkbox" name="data_ids[]" value="{{ loop.index }}" class="select-item">
+                            <h3>{{ result.title }}</h3>
+                        </div>
+                        <div class="data-meta">
+                            <span class="source">{{ result.source }}</span>
+                            {% if result.url %}<a href="{{ result.url }}" target="_blank" class="url">查看原文</a>{% endif %}
+                        </div>
+                        <div class="data-content">
+                            {{ result.content }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if results %}
+                <div class="action-bar">
+                    <button type="button" id="select-all" class="btn btn-secondary">全选</button>
+                    <button type="button" id="deselect-all" class="btn btn-secondary">取消全选</button>
+                    <button type="submit" class="btn btn-primary">批量保存到数据库</button>
+                </div>
+                {% endif %}
+            </form>
+            
+            <div class="back-link">
+                <a href="{{ url_for('dashboard') }}" class="btn btn-link">返回首页</a>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        // 存储搜索结果数据
+        const resultsData = {{ results|tojson|safe }};
+        // 为每个结果添加ID
+        resultsData.forEach((item, index) => {
+            item.id = index + 1;
+        });
+        document.getElementById('results-data').value = JSON.stringify(resultsData);
+        
+        // 全选/取消全选功能
+        document.getElementById('select-all').addEventListener('click', function() {
+            document.querySelectorAll('.select-item').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        });
+        
+        document.getElementById('deselect-all').addEventListener('click', function() {
+            document.querySelectorAll('.select-item').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        });
+    </script>
+</body>
+</html>
